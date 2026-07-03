@@ -1,0 +1,125 @@
+{{- if .Values.canary.enabled -}}
+{{- $repo := default .Values.image.repository .Values.canary.image.repository -}}
+{{- $tag := default .Values.image.tag .Values.canary.image.tag -}}
+{{- $pullPolicy := default .Values.image.pullPolicy .Values.canary.image.pullPolicy -}}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "interview-app.canaryFullname" . }}
+  labels:
+    {{- include "interview-app.labels" . | nindent 4 }}
+    app.kubernetes.io/component: web-canary
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - port: {{ .Values.service.port }}
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    {{- include "interview-app.canarySelectorLabels" . | nindent 4 }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "interview-app.canaryFullname" . }}
+  labels:
+    {{- include "interview-app.labels" . | nindent 4 }}
+    app.kubernetes.io/component: web-canary
+spec:
+  replicas: {{ .Values.canary.replicaCount }}
+  strategy:
+    {{- toYaml .Values.deploymentStrategy | nindent 4 }}
+  selector:
+    matchLabels:
+      {{- include "interview-app.canarySelectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "interview-app.canarySelectorLabels" . | nindent 8 }}
+    spec:
+      serviceAccountName: {{ include "interview-app.serviceAccountName" . }}
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: app
+          image: "{{ required "canary image repository is required" $repo }}:{{ required "canary image tag is required" $tag }}"
+          imagePullPolicy: {{ $pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.service.targetPort }}
+              protocol: TCP
+          env:
+            - name: APP_VERSION
+              value: {{ printf "%s-canary" $tag | quote }}
+            - name: APP_ENV
+              value: {{ .Values.canary.config.appEnv | quote }}
+            - name: APP_MESSAGE
+              value: {{ .Values.canary.config.appMessage | quote }}
+            - name: REDIS_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "interview-app.fullname" . }}
+                  key: REDIS_HOST
+            - name: REDIS_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "interview-app.fullname" . }}
+                  key: REDIS_PORT
+            - name: AWS_SECRET_ID
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "interview-app.fullname" . }}
+                  key: AWS_SECRET_ID
+            - name: DEMO_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "interview-app.fullname" . }}
+                  key: DEMO_API_KEY
+                  optional: true
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: POD_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+            - name: NODE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            initialDelaySeconds: 15
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          startupProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            failureThreshold: 30
+            periodSeconds: 2
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true
+            runAsUser: 100
+{{- end }}

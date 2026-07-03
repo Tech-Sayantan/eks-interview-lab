@@ -11,6 +11,20 @@ image:
   tag: "dev"
   pullPolicy: IfNotPresent
 
+canary:
+  enabled: false
+  actionName: ""
+  stableWeight: 90
+  weight: 10
+  replicaCount: 1
+  image:
+    repository: ""
+    tag: ""
+    pullPolicy: IfNotPresent
+  config:
+    appEnv: "canary"
+    appMessage: "CANARY - weighted ALB traffic split"
+
 nameOverride: ""
 fullnameOverride: ""
 

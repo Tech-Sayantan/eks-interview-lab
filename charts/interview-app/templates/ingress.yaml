@@ -7,6 +7,10 @@ metadata:
     {{- include "interview-app.labels" . | nindent 4 }}
   annotations:
     {{- toYaml .Values.ingress.annotations | nindent 4 }}
+    {{- if .Values.canary.enabled }}
+    alb.ingress.kubernetes.io/actions.{{ include "interview-app.canaryActionName" . }}: >
+      {"type":"forward","forwardConfig":{"targetGroups":[{"serviceName":"{{ include "interview-app.fullname" . }}","servicePort":"{{ .Values.service.port }}","weight":{{ .Values.canary.stableWeight }}},{"serviceName":"{{ include "interview-app.canaryFullname" . }}","servicePort":"{{ .Values.service.port }}","weight":{{ .Values.canary.weight }}}]}}
+    {{- end }}
     {{- if .Values.ingress.certificateArn }}
     alb.ingress.kubernetes.io/certificate-arn: {{ .Values.ingress.certificateArn | quote }}
     alb.ingress.kubernetes.io/listen-ports: '[{"HTTP":80},{"HTTPS":443}]'
@@ -26,9 +30,15 @@ spec:
             pathType: {{ .pathType }}
             backend:
               service:
+                {{- if $.Values.canary.enabled }}
+                name: {{ include "interview-app.canaryActionName" $ }}
+                port:
+                  name: use-annotation
+                {{- else }}
                 name: {{ include "interview-app.fullname" $ }}
                 port:
                   name: http
+                {{- end }}
           {{- end }}
     {{- end }}
 {{- end }}

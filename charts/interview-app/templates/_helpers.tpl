@@ -34,6 +34,20 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 app.kubernetes.io/component: web
 {{- end -}}
 
+{{- define "interview-app.canaryFullname" -}}
+{{- printf "%s-canary" (include "interview-app.fullname" .) | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
+
+{{- define "interview-app.canarySelectorLabels" -}}
+app.kubernetes.io/name: {{ include "interview-app.name" . }}
+app.kubernetes.io/instance: {{ .Release.Name }}
+app.kubernetes.io/component: web-canary
+{{- end -}}
+
+{{- define "interview-app.canaryActionName" -}}
+{{- default (printf "%s-weighted" (include "interview-app.fullname" .)) .Values.canary.actionName | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
+
 {{- define "interview-app.serviceAccountName" -}}
 {{- if .Values.serviceAccount.create -}}
 {{- default (include "interview-app.fullname" .) .Values.serviceAccount.name -}}
