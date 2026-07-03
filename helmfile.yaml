@@ -1,0 +1,12 @@
+helmDefaults:
+  wait: true
+  timeout: 600
+  cleanupOnFail: true
+  createNamespace: true
+
+releases:
+  - name: interview-app
+    namespace: interview
+    chart: ./charts/interview-app
+    values:
+      - ./manual-values/my-values.yaml

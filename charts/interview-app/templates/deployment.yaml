@@ -6,6 +6,8 @@ metadata:
     {{- include "interview-app.labels" . | nindent 4 }}
 spec:
   replicas: {{ .Values.replicaCount }}
+  strategy:
+    {{- toYaml .Values.deploymentStrategy | nindent 4 }}
   selector:
     matchLabels:
       {{- include "interview-app.appSelectorLabels" . | nindent 6 }}
