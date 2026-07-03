@@ -18,6 +18,7 @@ podAnnotations: {}
 config:
   appEnv: "dev"
   appMessage: "hello from EKS interview lab"
+  awsSecretId: "interview/app/demo"
 
 secret:
   create: true

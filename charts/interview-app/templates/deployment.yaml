@@ -53,6 +53,11 @@ spec:
                 configMapKeyRef:
                   name: {{ include "interview-app.fullname" . }}
                   key: REDIS_PORT
+            - name: AWS_SECRET_ID
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "interview-app.fullname" . }}
+                  key: AWS_SECRET_ID
             - name: DEMO_API_KEY
               valueFrom:
                 secretKeyRef:

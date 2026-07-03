@@ -18,6 +18,7 @@ env:
   APP_HOSTNAME: ${{ vars.APP_HOSTNAME }}
   CERTIFICATE_ARN: ${{ vars.CERTIFICATE_ARN }}
   APP_ROLE_ARN: ${{ vars.APP_ROLE_ARN }}
+  AWS_SECRET_ID: ${{ vars.AWS_SECRET_ID || 'interview/app/demo' }}
 
 jobs:
   build-and-deploy:
@@ -63,6 +64,7 @@ jobs:
           config:
             appEnv: "eks"
             appMessage: "deployed by GitHub Actions OIDC"
+            awsSecretId: "${AWS_SECRET_ID}"
           ingress:
             certificateArn: "${CERTIFICATE_ARN}"
             hosts:

@@ -1,3 +1,4 @@
+import json
 import os
 import socket
 import time
@@ -22,6 +23,20 @@ def redis_client() -> redis.Redis:
     return redis.Redis(host=redis_host, port=redis_port, socket_timeout=2, decode_responses=True)
 
 
+def secret_summary(secret_value: str | bytes | None) -> dict[str, Any]:
+    if secret_value is None:
+        return {"type": "empty", "length": 0, "keys": []}
+    if isinstance(secret_value, bytes):
+        return {"type": "binary", "length": len(secret_value), "keys": []}
+    try:
+        parsed = json.loads(secret_value)
+    except json.JSONDecodeError:
+        return {"type": "string", "length": len(secret_value), "keys": []}
+    if isinstance(parsed, dict):
+        return {"type": "json", "length": len(secret_value), "keys": sorted(parsed.keys())}
+    return {"type": type(parsed).__name__, "length": len(secret_value), "keys": []}
+
+
 def app_payload() -> dict[str, Any]:
     return {
         "app": "eks-interview-lab",
@@ -40,6 +55,7 @@ def app_payload() -> dict[str, Any]:
             "/readyz",
             "/config",
             "/secret-check",
+            "/secret-manager-check",
             "/redis/incr",
             "/aws/identity",
             "/burn?seconds=5",
@@ -340,6 +356,10 @@ def root() -> HTMLResponse:
             <div class="label">Secret Mount</div>
             <div id="secret" class="value">checking</div>
           </div>
+          <div class="metric">
+            <div class="label">Secrets Manager</div>
+            <div id="secret-manager" class="value">checking IRSA access</div>
+          </div>
         </article>
         <article class="card span-4">
           <h2>Identity</h2>
@@ -389,6 +409,7 @@ def root() -> HTMLResponse:
             <span class="chip">Ingress</span>
             <span class="chip">ConfigMap</span>
             <span class="chip">Secret</span>
+            <span class="chip">Secrets Manager</span>
             <span class="chip">ServiceAccount</span>
             <span class="chip">IRSA</span>
             <span class="chip">StatefulSet</span>
@@ -405,7 +426,7 @@ def root() -> HTMLResponse:
             <span class="chip">EBS CSI</span>
             <span class="chip">GitHub Actions OIDC</span>
           </div>
-          <p class="footer-note">Practice endpoints: <code>/healthz</code>, <code>/readyz</code>, <code>/config</code>, <code>/secret-check</code>, <code>/redis/incr</code>, <code>/aws/identity</code>, <code>/burn?seconds=5</code>.</p>
+          <p class="footer-note">Practice endpoints: <code>/healthz</code>, <code>/readyz</code>, <code>/config</code>, <code>/secret-check</code>, <code>/secret-manager-check</code>, <code>/redis/incr</code>, <code>/aws/identity</code>, <code>/burn?seconds=5</code>.</p>
         </article>
       </section>
     </main>
@@ -454,6 +475,12 @@ def root() -> HTMLResponse:
         text("secret", secret.secret_mounted ? `mounted, length ${secret.length}` : "missing");
       } catch (err) {
         text("secret", "check failed");
+      }
+      try {
+        const managedSecret = await getJson("/secret-manager-check");
+        text("secret-manager", `${managedSecret.status}, ${managedSecret.summary.type}, keys: ${managedSecret.summary.keys.join(", ") || "none"}`);
+      } catch (err) {
+        text("secret-manager", "check failed");
       }
       try {
         const aws = await getJson("/api/aws-summary");
@@ -510,6 +537,7 @@ def config() -> dict[str, str]:
         "APP_MESSAGE": env("APP_MESSAGE"),
         "REDIS_HOST": env("REDIS_HOST"),
         "REDIS_PORT": env("REDIS_PORT"),
+        "AWS_SECRET_ID": env("AWS_SECRET_ID"),
     }
 
 
@@ -521,6 +549,25 @@ def secret_check() -> dict[str, Any]:
         "length": len(value),
         "note": "The app never returns the secret value.",
     }
+
+
+@app.get("/secret-manager-check")
+def secret_manager_check() -> dict[str, Any]:
+    secret_id = env("AWS_SECRET_ID", "interview/app/demo")
+    try:
+        response = boto3.client("secretsmanager").get_secret_value(SecretId=secret_id)
+        value = response.get("SecretString")
+        if value is None:
+            value = response.get("SecretBinary")
+        return {
+            "status": "retrieved",
+            "source": "AWS Secrets Manager through pod IRSA",
+            "secret_id": secret_id,
+            "summary": secret_summary(value),
+            "note": "The app proves retrieval but never returns the secret value.",
+        }
+    except Exception as exc:
+        raise HTTPException(status_code=503, detail=f"Secrets Manager unavailable: {exc}") from exc
 
 
 @app.get("/redis/incr")

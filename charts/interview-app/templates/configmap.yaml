@@ -9,3 +9,4 @@ data:
   APP_MESSAGE: {{ .Values.config.appMessage | quote }}
   REDIS_HOST: {{ printf "%s-redis" (include "interview-app.fullname" .) | quote }}
   REDIS_PORT: "6379"
+  AWS_SECRET_ID: {{ .Values.config.awsSecretId | quote }}
