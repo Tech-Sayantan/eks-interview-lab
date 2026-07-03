@@ -578,7 +578,7 @@ eksctl create iamserviceaccount \
   --name ebs-csi-controller-sa \
   --role-name interview-eks-AmazonEKS_EBS_CSI_DriverRole \
   --role-only \
-  --attach-policy-arn arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicyV2 \
+  --attach-policy-arn arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy \
   --approve \
   --override-existing-serviceaccounts \
   --profile eks-lab

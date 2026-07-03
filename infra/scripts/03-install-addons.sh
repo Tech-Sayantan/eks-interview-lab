@@ -40,7 +40,7 @@ eksctl create iamserviceaccount \
   --name ebs-csi-controller-sa \
   --role-name "$EBS_ROLE_NAME" \
   --role-only \
-  --attach-policy-arn arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicyV2 \
+  --attach-policy-arn arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy \
   --approve \
   --override-existing-serviceaccounts
 
