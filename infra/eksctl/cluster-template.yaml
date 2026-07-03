@@ -1,0 +1,57 @@
+apiVersion: eksctl.io/v1alpha5
+kind: ClusterConfig
+
+metadata:
+  name: __CLUSTER_NAME__
+  region: __AWS_REGION__
+  version: "__K8S_VERSION__"
+  tags:
+    project: eks-interview-lab
+    owner: interview-practice
+
+accessConfig:
+  authenticationMode: API_AND_CONFIG_MAP
+  bootstrapClusterCreatorAdminPermissions: true
+
+iam:
+  withOIDC: true
+
+vpc:
+  cidr: 10.20.0.0/16
+  nat:
+    gateway: Disable
+  clusterEndpoints:
+    publicAccess: true
+    privateAccess: false
+
+addons:
+  - name: vpc-cni
+  - name: coredns
+  - name: kube-proxy
+
+nodeGroups:
+  - name: ng-self-spot
+    minSize: 1
+    desiredCapacity: 2
+    maxSize: 3
+    amiFamily: AmazonLinux2023
+    volumeSize: 30
+    volumeType: gp3
+    privateNetworking: false
+    ssh:
+      allow: false
+    labels:
+      role: worker
+      lifecycle: spot
+    tags:
+      k8s.io/cluster-autoscaler/enabled: "true"
+      k8s.io/cluster-autoscaler/__CLUSTER_NAME__: "owned"
+    instancesDistribution:
+      instanceTypes:
+        - t3.small
+        - t3a.small
+        - t3.medium
+        - t3a.medium
+      onDemandBaseCapacity: 0
+      onDemandPercentageAboveBaseCapacity: 0
+      spotAllocationStrategy: capacity-optimized

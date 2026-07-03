@@ -1,0 +1,15 @@
+{{- if .Values.practicePvc.enabled -}}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "interview-app.fullname" . }}-practice
+  labels:
+    {{- include "interview-app.labels" . | nindent 4 }}
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: {{ .Values.storageClass.name }}
+  resources:
+    requests:
+      storage: {{ .Values.practicePvc.size }}
+{{- end }}

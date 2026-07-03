@@ -1,0 +1,6 @@
+apiVersion: v2
+name: interview-app
+description: A compact EKS, Helm, Kubernetes, and AWS interview practice chart.
+type: application
+version: 0.1.0
+appVersion: "1.0.0"

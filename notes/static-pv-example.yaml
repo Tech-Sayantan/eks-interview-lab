@@ -1,0 +1,32 @@
+# Do not apply this as-is.
+# This is only for interview practice to understand static PV binding.
+# Replace volumeHandle with a real EBS volume ID in the same region/AZ as the node.
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: static-ebs-example
+spec:
+  capacity:
+    storage: 5Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: static-ebs
+  csi:
+    driver: ebs.csi.aws.com
+    volumeHandle: vol-0123456789abcdef0
+    fsType: ext4
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: static-ebs-example
+  namespace: interview
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: static-ebs
+  resources:
+    requests:
+      storage: 5Gi

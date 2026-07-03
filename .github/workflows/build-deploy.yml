@@ -1,0 +1,83 @@
+name: Build and Deploy to EKS
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  AWS_REGION: ${{ vars.AWS_REGION || 'ap-south-1' }}
+  CLUSTER_NAME: ${{ vars.CLUSTER_NAME || 'interview-eks' }}
+  NAMESPACE: ${{ vars.NAMESPACE || 'interview' }}
+  HELM_RELEASE: ${{ vars.HELM_RELEASE || 'interview-app' }}
+  ECR_REPOSITORY: ${{ vars.ECR_REPOSITORY || 'interview-app' }}
+  APP_HOSTNAME: ${{ vars.APP_HOSTNAME }}
+  CERTIFICATE_ARN: ${{ vars.CERTIFICATE_ARN }}
+  APP_ROLE_ARN: ${{ vars.APP_ROLE_ARN }}
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials through OIDC
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build and push image
+        env:
+          REGISTRY: ${{ steps.ecr.outputs.registry }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          IMAGE_URI="${REGISTRY}/${ECR_REPOSITORY}:${IMAGE_TAG}"
+          docker build --platform linux/amd64 -t "$IMAGE_URI" app
+          docker push "$IMAGE_URI"
+          echo "IMAGE_URI=$IMAGE_URI" >> "$GITHUB_ENV"
+          echo "IMAGE_REPOSITORY=${REGISTRY}/${ECR_REPOSITORY}" >> "$GITHUB_ENV"
+          echo "IMAGE_TAG=$IMAGE_TAG" >> "$GITHUB_ENV"
+
+      - name: Configure kubeconfig
+        run: aws eks update-kubeconfig --region "$AWS_REGION" --name "$CLUSTER_NAME"
+
+      - name: Deploy with Helm
+        run: |
+          set -euo pipefail
+          cat > /tmp/deploy-values.yaml <<YAML
+          image:
+            repository: "${IMAGE_REPOSITORY}"
+            tag: "${IMAGE_TAG}"
+          config:
+            appEnv: "eks"
+            appMessage: "deployed by GitHub Actions OIDC"
+          ingress:
+            certificateArn: "${CERTIFICATE_ARN}"
+            hosts:
+              - host: "${APP_HOSTNAME}"
+                paths:
+                  - path: /
+                    pathType: Prefix
+          serviceAccount:
+            annotations:
+              eks.amazonaws.com/role-arn: "${APP_ROLE_ARN}"
+          YAML
+
+          helm lint charts/interview-app -f /tmp/deploy-values.yaml
+          helm upgrade --install "$HELM_RELEASE" charts/interview-app \
+            --namespace "$NAMESPACE" \
+            -f /tmp/deploy-values.yaml \
+            --wait \
+            --timeout 10m

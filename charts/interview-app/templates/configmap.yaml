@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "interview-app.fullname" . }}
+  labels:
+    {{- include "interview-app.labels" . | nindent 4 }}
+data:
+  APP_ENV: {{ .Values.config.appEnv | quote }}
+  APP_MESSAGE: {{ .Values.config.appMessage | quote }}
+  REDIS_HOST: {{ printf "%s-redis" (include "interview-app.fullname" .) | quote }}
+  REDIS_PORT: "6379"
