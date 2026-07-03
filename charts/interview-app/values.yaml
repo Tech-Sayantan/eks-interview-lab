@@ -90,6 +90,8 @@ redis:
     limits:
       cpu: 250m
       memory: 256Mi
+  securityContext:
+    allowPrivilegeEscalation: true
 
 daemonset:
   enabled: true

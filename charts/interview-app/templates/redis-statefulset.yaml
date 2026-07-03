@@ -71,10 +71,7 @@ spec:
           resources:
             {{- toYaml .Values.redis.resources | nindent 12 }}
           securityContext:
-            allowPrivilegeEscalation: false
-            capabilities:
-              drop:
-                - ALL
+            {{- toYaml .Values.redis.securityContext | nindent 12 }}
   volumeClaimTemplates:
     - metadata:
         name: data
