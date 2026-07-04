@@ -11,6 +11,7 @@ Use this as the table of contents for the final two-day revision.
 5. `13-eks-cluster-upgrade-runbook.md`
 6. `14-cloudwatch-observability-cost-ops-runbook.md`
 7. `15-eks-iam-rbac-access-control-runbook.md`
+8. `18-final-interview-question-bank.md`
 
 These give the fastest return.
 
@@ -28,6 +29,9 @@ Read these when you want depth:
 - `13-eks-cluster-upgrade-runbook.md`
 - `14-cloudwatch-observability-cost-ops-runbook.md`
 - `15-eks-iam-rbac-access-control-runbook.md`
+- `16-docker-ecr-container-security-runbook.md`
+- `17-kubernetes-scheduling-resilience-runbook.md`
+- `18-final-interview-question-bank.md`
 
 ## What We Covered In Hands-On Practice
 
@@ -63,6 +67,8 @@ Read these when you want depth:
 - EKS cluster upgrade planning and failure scenarios
 - CloudWatch, observability, cost optimization, and day-2 operations
 - IAM, EKS access entries, Kubernetes RBAC, and developer onboarding
+- Docker image lifecycle, ECR, container security, and ImagePullBackOff debugging
+- Kubernetes scheduling, taints/tolerations, affinity, topology spread, PDBs, and autoscaling
 
 ## Topics To Still Research Briefly
 
@@ -82,6 +88,7 @@ These are useful if you have extra time:
 - Kubernetes API deprecation tools such as `kubent` and `pluto`
 - OpenTelemetry, Prometheus, Grafana, Kubecost, and AWS security/ops services
 - IAM Identity Center, EKS Access Entries, `aws-auth`, and Kubernetes RBAC patterns
+- SBOM, image signing, admission control, and policy-as-code for supply-chain security
 
 ## Final Interview Mantra
 
