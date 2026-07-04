@@ -10,6 +10,7 @@ Use this as the table of contents for the final two-day revision.
 4. `12-teardown-and-cost-control-checklist.md`
 5. `13-eks-cluster-upgrade-runbook.md`
 6. `14-cloudwatch-observability-cost-ops-runbook.md`
+7. `15-eks-iam-rbac-access-control-runbook.md`
 
 These give the fastest return.
 
@@ -26,6 +27,7 @@ Read these when you want depth:
 - `08-company-style-github-actions-cicd.md`
 - `13-eks-cluster-upgrade-runbook.md`
 - `14-cloudwatch-observability-cost-ops-runbook.md`
+- `15-eks-iam-rbac-access-control-runbook.md`
 
 ## What We Covered In Hands-On Practice
 
@@ -60,6 +62,7 @@ Read these when you want depth:
 - teardown PDB blocker and cost cleanup
 - EKS cluster upgrade planning and failure scenarios
 - CloudWatch, observability, cost optimization, and day-2 operations
+- IAM, EKS access entries, Kubernetes RBAC, and developer onboarding
 
 ## Topics To Still Research Briefly
 
@@ -78,6 +81,7 @@ These are useful if you have extra time:
 - EKS cost controls and teardown checks
 - Kubernetes API deprecation tools such as `kubent` and `pluto`
 - OpenTelemetry, Prometheus, Grafana, Kubecost, and AWS security/ops services
+- IAM Identity Center, EKS Access Entries, `aws-auth`, and Kubernetes RBAC patterns
 
 ## Final Interview Mantra
 
