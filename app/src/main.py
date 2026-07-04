@@ -51,6 +51,7 @@ def app_payload() -> dict[str, Any]:
             "hostname": socket.gethostname(),
         },
         "try": [
+            "/api/info",
             "/healthz",
             "/readyz",
             "/config",
@@ -92,23 +93,24 @@ def root() -> HTMLResponse:
   <style>
     :root {
       color-scheme: light;
-      --ink: #172033;
-      --muted: #62718a;
-      --line: #dbe2ee;
+      --ink: #14213d;
+      --muted: #64748b;
+      --line: #d7dee9;
       --panel: #ffffff;
-      --panel-soft: #f6f8fb;
-      --blue: #2563eb;
-      --green: #059669;
+      --panel-soft: #f7f9fc;
+      --blue: #1d4ed8;
+      --teal: #0f766e;
+      --green: #047857;
       --amber: #b7791f;
       --red: #dc2626;
-      --shadow: 0 18px 48px rgba(16, 24, 40, .12);
+      --shadow: 0 18px 44px rgba(20, 33, 61, .10);
     }
     * { box-sizing: border-box; }
     body {
       margin: 0;
       font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       color: var(--ink);
-      background: #eef2f7;
+      background: #edf2f7;
     }
     .shell {
       min-height: 100vh;
@@ -116,7 +118,7 @@ def root() -> HTMLResponse:
       grid-template-rows: auto 1fr;
     }
     header {
-      background: #0f172a;
+      background: #101820;
       color: #f8fafc;
       border-bottom: 1px solid rgba(255,255,255,.12);
     }
@@ -128,6 +130,24 @@ def root() -> HTMLResponse:
       grid-template-columns: 1fr auto;
       gap: 24px;
       align-items: end;
+    }
+    .hero-stats {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 18px;
+    }
+    .hero-stat {
+      border: 1px solid rgba(255,255,255,.14);
+      border-radius: 999px;
+      background: rgba(255,255,255,.08);
+      color: #dbeafe;
+      min-height: 34px;
+      display: inline-flex;
+      align-items: center;
+      padding: 0 12px;
+      font-size: 13px;
+      font-weight: 800;
     }
     .eyebrow {
       margin: 0 0 10px;
@@ -194,6 +214,7 @@ def root() -> HTMLResponse:
       border-radius: 8px;
       box-shadow: var(--shadow);
       padding: 20px;
+      min-width: 0;
     }
     .span-4 { grid-column: span 4; }
     .span-6 { grid-column: span 6; }
@@ -227,6 +248,14 @@ def root() -> HTMLResponse:
       font-size: 30px;
       font-weight: 800;
     }
+    .value.ok { color: var(--green); }
+    .value.warn { color: var(--amber); }
+    .mini {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+      overflow-wrap: anywhere;
+    }
     .stack {
       display: grid;
       gap: 10px;
@@ -244,6 +273,24 @@ def root() -> HTMLResponse:
       font-size: 13px;
       font-weight: 700;
       color: #334155;
+    }
+    .route-list {
+      display: grid;
+      gap: 8px;
+    }
+    .route {
+      display: grid;
+      grid-template-columns: 120px 1fr;
+      gap: 10px;
+      align-items: center;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel-soft);
+      padding: 10px;
+    }
+    .route code {
+      width: fit-content;
+      background: #e8eef7;
     }
     .topology {
       display: grid;
@@ -268,6 +315,11 @@ def root() -> HTMLResponse:
       border-color: rgba(37, 99, 235, .35);
       background: #eff6ff;
       color: #1d4ed8;
+    }
+    .node.aws {
+      border-color: rgba(15, 118, 110, .35);
+      background: #ecfdf5;
+      color: #0f766e;
     }
     .button-row {
       display: flex;
@@ -321,6 +373,13 @@ def root() -> HTMLResponse:
           <p class="eyebrow">AWS EKS practice environment</p>
           <h1>EKS Interview Lab</h1>
           <p class="subtitle">A live Kubernetes deployment using Docker, Helm, ECR, ALB Ingress, Route 53, ACM, Redis StatefulSet, EBS CSI, IRSA, HPA, NetworkPolicy, and GitHub Actions OIDC.</p>
+          <div class="hero-stats">
+            <span class="hero-stat">ALB Ingress</span>
+            <span class="hero-stat">IRSA</span>
+            <span class="hero-stat">EBS gp3</span>
+            <span class="hero-stat">HPA 2-5</span>
+            <span class="hero-stat">Helm Release</span>
+          </div>
         </div>
         <div class="status-pill"><span id="overall-dot" class="dot"></span><span id="overall-status">Checking live status</span></div>
       </div>
@@ -340,6 +399,11 @@ def root() -> HTMLResponse:
           <div class="metric">
             <div class="label">Message</div>
             <div id="message" class="value">loading</div>
+          </div>
+          <div class="metric">
+            <div class="label">Current Pod</div>
+            <div id="pod-name" class="value">loading</div>
+            <div id="pod-node" class="mini">node loading</div>
           </div>
         </article>
         <article class="card span-4">
@@ -377,10 +441,10 @@ def root() -> HTMLResponse:
           </div>
         </article>
         <article class="card span-8">
-          <h2>Architecture</h2>
+          <h2>Request Path</h2>
           <div class="topology">
-            <div class="node primary">Route 53<br>DNS</div>
-            <div class="node primary">ACM<br>TLS</div>
+            <div class="node aws">Route 53<br>DNS</div>
+            <div class="node aws">ACM<br>TLS</div>
             <div class="node primary">ALB<br>Ingress</div>
             <div class="node">Service<br>ClusterIP</div>
             <div class="node">Deployment<br>FastAPI</div>
@@ -402,7 +466,7 @@ def root() -> HTMLResponse:
           </div>
         </article>
         <article class="card span-12">
-          <h2>Kubernetes And AWS Objects In This Lab</h2>
+          <h2>Live Practice Surface</h2>
           <div class="chip-row">
             <span class="chip">Deployment</span>
             <span class="chip">Service</span>
@@ -426,7 +490,25 @@ def root() -> HTMLResponse:
             <span class="chip">EBS CSI</span>
             <span class="chip">GitHub Actions OIDC</span>
           </div>
-          <p class="footer-note">Practice endpoints: <code>/healthz</code>, <code>/readyz</code>, <code>/config</code>, <code>/secret-check</code>, <code>/secret-manager-check</code>, <code>/redis/incr</code>, <code>/aws/identity</code>, <code>/burn?seconds=5</code>.</p>
+          <p class="footer-note">Practice endpoints stay intentionally visible because this page doubles as a quick smoke-test dashboard for the interview lab.</p>
+        </article>
+        <article class="card span-6">
+          <h2>Smoke Test Routes</h2>
+          <div class="route-list">
+            <div class="route"><code>/healthz</code><span>container liveness</span></div>
+            <div class="route"><code>/readyz</code><span>readiness plus Redis dependency</span></div>
+            <div class="route"><code>/secret-manager-check</code><span>IRSA access to AWS Secrets Manager</span></div>
+            <div class="route"><code>/redis/incr</code><span>StatefulSet plus EBS-backed Redis check</span></div>
+          </div>
+        </article>
+        <article class="card span-6">
+          <h2>Operational Signals</h2>
+          <div class="route-list">
+            <div class="route"><code>Helm</code><span>release history and rollback practice</span></div>
+            <div class="route"><code>HPA</code><span>CPU-based replica scaling from 2 to 5 pods</span></div>
+            <div class="route"><code>PDB</code><span>planned disruption protection during drains</span></div>
+            <div class="route"><code>EBS</code><span>zonal volume scheduling and attach behavior</span></div>
+          </div>
         </article>
       </section>
     </main>
@@ -453,15 +535,21 @@ def root() -> HTMLResponse:
         text("version", info.version || "unknown");
         text("environment", info.environment || "unknown");
         text("message", info.message || "unknown");
+        text("pod-name", info.pod?.name || "unknown");
+        text("pod-node", `node ${info.pod?.node || "unknown"} - ip ${info.pod?.ip || "unknown"}`);
       } catch (err) {
         text("message", "Could not load app metadata");
+        text("pod-name", "metadata unavailable");
+        text("pod-node", "node unavailable");
       }
       try {
         await getJson("/healthz");
         healthy = true;
         text("healthz", "OK");
+        document.getElementById("healthz").className = "value big ok";
       } catch (err) {
         text("healthz", "failed");
+        document.getElementById("healthz").className = "value big warn";
       }
       try {
         const readiness = await getJson("/readyz");
