@@ -9,8 +9,9 @@ Use this as the table of contents for the final two-day revision.
 3. `10-two-day-interview-study-plan.md`
 4. `12-teardown-and-cost-control-checklist.md`
 5. `13-eks-cluster-upgrade-runbook.md`
+6. `14-cloudwatch-observability-cost-ops-runbook.md`
 
-These three give the fastest return.
+These give the fastest return.
 
 ## Deep Dives
 
@@ -24,6 +25,7 @@ Read these when you want depth:
 - `07-eks-cluster-creation-networking-dns-deep-dive.md`
 - `08-company-style-github-actions-cicd.md`
 - `13-eks-cluster-upgrade-runbook.md`
+- `14-cloudwatch-observability-cost-ops-runbook.md`
 
 ## What We Covered In Hands-On Practice
 
@@ -57,6 +59,7 @@ Read these when you want depth:
 - teardown
 - teardown PDB blocker and cost cleanup
 - EKS cluster upgrade planning and failure scenarios
+- CloudWatch, observability, cost optimization, and day-2 operations
 
 ## Topics To Still Research Briefly
 
@@ -74,6 +77,7 @@ These are useful if you have extra time:
 - OpenTelemetry basics
 - EKS cost controls and teardown checks
 - Kubernetes API deprecation tools such as `kubent` and `pluto`
+- OpenTelemetry, Prometheus, Grafana, Kubecost, and AWS security/ops services
 
 ## Final Interview Mantra
 
