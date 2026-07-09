@@ -2,6 +2,8 @@
 
 This is a compact 1 to 1.5 day hands-on lab for Kubernetes, Docker, Helm, GitHub Actions OIDC, and AWS EKS.
 
+Documentation site: https://tech-sayantan.github.io/eks-interview-lab/
+
 If you are doing the lab today, start with `START_HERE_TODAY.md`. It is the shortest clear entry point and tells you exactly what to do first.
 
 If you want a very hand-held full walkthrough, use `MANUAL_FROM_ZERO_GUIDE.md`. It covers GitHub, AWS account access, local tool installation, VS Code, code push, EKS setup, Helm deploy, DNS, OIDC, practice, and teardown.

@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>EKS Interview Lab</title>
+    <meta name="description" content="A hands-on AWS EKS interview lab with Kubernetes, Helm, GitHub Actions OIDC, ALB Ingress, Route 53, ACM, IRSA, and teardown.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=Sora:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href="index.html" aria-label="EKS Interview Lab home">
+        <span class="brand-mark">EKS</span>
+        <span>EKS Interview Lab</span>
+      </a>
+      <nav class="nav-links" aria-label="Primary navigation">
+        <a href="https://github.com/Tech-Sayantan/eks-interview-lab">Repository</a>
+        <a href="https://github.com/Tech-Sayantan/eks-interview-lab/blob/main/START_HERE_TODAY.md">Start Here</a>
+        <a href="https://github.com/Tech-Sayantan/eks-interview-lab/tree/main/notes">Notes</a>
+      </nav>
+    </header>
+
+    <main>
+      <section class="hero">
+        <div class="hero-copy">
+          <p class="eyebrow">Kubernetes platform lab</p>
+          <h1>Practice EKS like a platform engineer, not a command collector.</h1>
+          <p>
+            Build one real cluster, deploy one real app, expose it through ALB and Route 53, practice Kubernetes objects,
+            wire IAM with OIDC, and tear everything down before cost becomes the story.
+          </p>
+          <div class="hero-actions">
+            <a class="button primary" href="https://github.com/Tech-Sayantan/eks-interview-lab/blob/main/START_HERE_TODAY.md">Begin Lab</a>
+            <a class="button secondary" href="https://github.com/Tech-Sayantan/eks-interview-lab/blob/main/MANUAL_FROM_ZERO_GUIDE.md">Full Walkthrough</a>
+          </div>
+        </div>
+
+        <div class="cluster-map" aria-label="EKS platform architecture visual">
+          <div class="map-title">
+            <span>platform topology</span>
+            <strong>cost-guarded</strong>
+          </div>
+          <svg viewBox="0 0 760 500" role="img" aria-label="Route 53 to EKS application architecture">
+            <defs>
+              <linearGradient id="clusterLine" x1="0" x2="1" y1="0" y2="0">
+                <stop offset="0%" stop-color="#06a77d"/>
+                <stop offset="50%" stop-color="#2d9cdb"/>
+                <stop offset="100%" stop-color="#f45d48"/>
+              </linearGradient>
+            </defs>
+            <path class="line" d="M80 110 H224 H364 H506 H650"/>
+            <path class="line soft" d="M364 110 V250 H214"/>
+            <path class="line soft" d="M506 110 V250 H650"/>
+            <g class="node"><rect x="28" y="74" width="104" height="72" rx="8"/><text x="80" y="104">Route 53</text><text x="80" y="126">DNS</text></g>
+            <g class="node"><rect x="172" y="74" width="104" height="72" rx="8"/><text x="224" y="104">ACM</text><text x="224" y="126">TLS</text></g>
+            <g class="node"><rect x="312" y="74" width="104" height="72" rx="8"/><text x="364" y="104">ALB</text><text x="364" y="126">Ingress</text></g>
+            <g class="node"><rect x="454" y="74" width="104" height="72" rx="8"/><text x="506" y="104">Service</text><text x="506" y="126">ClusterIP</text></g>
+            <g class="node app"><rect x="598" y="74" width="104" height="72" rx="8"/><text x="650" y="104">Pods</text><text x="650" y="126">FastAPI</text></g>
+            <g class="node"><rect x="162" y="214" width="104" height="72" rx="8"/><text x="214" y="244">Helm</text><text x="214" y="266">Chart</text></g>
+            <g class="node"><rect x="312" y="214" width="104" height="72" rx="8"/><text x="364" y="244">IRSA</text><text x="364" y="266">IAM</text></g>
+            <g class="node"><rect x="598" y="214" width="104" height="72" rx="8"/><text x="650" y="244">Redis</text><text x="650" y="266">PVC</text></g>
+            <g class="guardrail"><rect x="116" y="356" width="528" height="70" rx="8"/><text x="380" y="386">Guardrails: ResourceQuota, LimitRange, HPA, PDB, NetworkPolicy, teardown</text></g>
+          </svg>
+        </div>
+      </section>
+
+      <section class="signal-row">
+        <article><strong>Helm</strong><span>repeatable app deploy</span></article>
+        <article><strong>OIDC</strong><span>GitHub to AWS trust</span></article>
+        <article><strong>IRSA</strong><span>pod-level AWS access</span></article>
+        <article><strong>Teardown</strong><span>cost-controlled finish</span></article>
+      </section>
+
+      <section class="section">
+        <div class="section-heading">
+          <p class="eyebrow">Lab surface</p>
+          <h2>One cluster, many interview doors.</h2>
+        </div>
+        <div class="feature-grid">
+          <article>
+            <span>01</span>
+            <h3>Cluster and networking</h3>
+            <p>Explain EKS control plane, nodes, public lab subnets, ALB Ingress, Route 53, and ACM.</p>
+          </article>
+          <article>
+            <span>02</span>
+            <h3>Kubernetes objects</h3>
+            <p>Practice Deployment, Service, Ingress, ConfigMap, Secret, StatefulSet, PVC, DaemonSet, HPA, and PDB.</p>
+          </article>
+          <article>
+            <span>03</span>
+            <h3>Identity and CI/CD</h3>
+            <p>Use GitHub Actions OIDC and IRSA so static AWS keys are not the main pattern.</p>
+          </article>
+          <article>
+            <span>04</span>
+            <h3>Operations runbooks</h3>
+            <p>Debug workloads, check probes, validate network policies, inspect autoscaling, and destroy safely.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="section split">
+        <div>
+          <p class="eyebrow">Guided entry</p>
+          <h2>Choose the right path for your energy level.</h2>
+          <p>
+            The lab has a fast start, a full from-zero guide, and compact notes for interview revision.
+            Use the fast path when time is short and the manual guide when you want the full story.
+          </p>
+        </div>
+        <div class="path-list">
+          <a href="https://github.com/Tech-Sayantan/eks-interview-lab/blob/main/START_HERE_TODAY.md">
+            <strong>Start here today</strong>
+            <span>Shortest clear entry point</span>
+          </a>
+          <a href="https://github.com/Tech-Sayantan/eks-interview-lab/blob/main/MANUAL_FROM_ZERO_GUIDE.md">
+            <strong>Manual from zero</strong>
+            <span>Hand-held build guide</span>
+          </a>
+          <a href="https://github.com/Tech-Sayantan/eks-interview-lab/blob/main/notes/18-final-interview-question-bank.md">
+            <strong>Final question bank</strong>
+            <span>Interview Q&A and talk tracks</span>
+          </a>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>
+
